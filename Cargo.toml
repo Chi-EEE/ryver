@@ -1,0 +1,21 @@
+[package]
+name = "ryver"
+version = "0.1.0"
+edition = "2021"
+authors = ["piquu"]
+license = "MIT"
+description = "A Cli that generates luau/ts files from spreadsheets"
+readme = "README.md"
+homepage = "https://github.com/piquu/ryver"
+repository = "https://github.com/piquu/ryver"
+keywords = ["cli", "luau", "ts", "spreadsheet"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+calamine = "0.24.0"
+clap = { version = "4.5.4", features = ["derive"] }
+color-eyre = "0.6.3"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
