@@ -14,6 +14,11 @@ Or use the `aftman` Cli to add it:
 aftman add piquu/river
 ```
 
+### With cargo
+```bash
+cargo install ryver
+```
+
 ## 📕Usage
 
 ### Arguments
