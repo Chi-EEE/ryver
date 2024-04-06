@@ -6,12 +6,12 @@ A Cli that generates luau/ts files from spreadsheets
 ### With Aftman
 Add an entry to the `[tools]` section of `aftman.toml`:
 ```toml
-river = "piquu/river@0.1.0"
+river = "piquu/ryver@0.1.0"
 ```
 
 Or use the `aftman` Cli to add it:
 ```bash
-aftman add piquu/river
+aftman add piquu/ryver
 ```
 
 ### With cargo
