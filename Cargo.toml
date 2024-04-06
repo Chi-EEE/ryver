@@ -2,7 +2,7 @@
 name = "ryver"
 version = "0.1.0"
 edition = "2021"
-authors = ["piquu"]
+authors = ["piquu piqu@cock.li"]
 license = "MIT"
 description = "A Cli that generates luau/ts files from spreadsheets"
 readme = "README.md"
