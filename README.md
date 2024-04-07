@@ -37,11 +37,11 @@ cargo install ryver
 
 ### Example
 ```bash
-ryver -f example.xlsx -o /out
+ryver -f example.xlsx -o ./out
 ```
 
 ```bash
-ryver -f test.xlsx -o /out -s Sheet1 -s Sheet2 --table-name 2 -t -g false
+ryver -f test.xlsx -o ./out -s Sheet1 -s Sheet2 --table-name 2 -t -n
 ```
 
 ## ✅Todo
