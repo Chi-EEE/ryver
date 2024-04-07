@@ -45,11 +45,9 @@ ryver -f test.xlsx -o ./out -s Sheet1 -s Sheet2 --table-name 2 -t -n
 ```
 
 ## ✅Todo
-* Add csv/tsv support
-* Add Google Sheets support
-* Add support for table/object names/entries with spaces
-* make --verbose do something
-* Fix a bug where table-name is still included in type/interface
+* [ ] Add csv/tsv support
+* [ ] Add Google Sheets support
+* [ ] Add support for table/object names/entries with spaces
 
 ## 📋License
 Ryver is licensed under the [MIT license](LICENSE).
