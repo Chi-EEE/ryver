@@ -43,7 +43,11 @@ impl Generator {
         self.push_line(format!("export type {} = {{", self.config.sheet.name).as_str());
         self.indent();
 
-        for (key, type_name) in self.config.sheet.types.clone() {
+        for (i, (key, type_name)) in self.config.sheet.types.clone().iter().enumerate() {
+            if i == self.config.table_name as usize {
+                continue;
+            }
+
             self.push_line(format!("{}: {};", key, type_name).as_str());
         }
 
@@ -56,17 +60,28 @@ impl Generator {
         self.push("\n");
 
         for column in self.config.sheet.sheet.clone() {
-            self.push_line(format!("{}.{} = {{", self.config.sheet.name, column[self.config.table_name as usize]).as_str());
+            self.push_line(
+                format!(
+                    "{}.{} = {{",
+                    self.config.sheet.name, column[self.config.table_name as usize]
+                )
+                .as_str(),
+            );
             self.indent();
 
             for (i, row) in column.iter().enumerate() {
-                if i == self.config.table_name.try_into().unwrap() { continue; }
+                if i == self.config.table_name.try_into().unwrap() {
+                    continue;
+                }
 
                 match row {
                     Values::Nil => self.push_line("nil;"),
-                    Values::String(s) => self.push_line(format!("{} = '{}';", self.config.sheet.types[i].0, s).as_str()),
-                    Values::Number(n) => self.push_line(format!("{} = {};", self.config.sheet.types[i].0, n).as_str()),
-                    Values::Boolean(b) => self.push_line(format!("{} = {};", self.config.sheet.types[i].0, b).as_str()),
+                    Values::String(s) => self
+                        .push_line(format!("{} = '{}';", self.config.sheet.types[i].0, s).as_str()),
+                    Values::Number(n) => self
+                        .push_line(format!("{} = {};", self.config.sheet.types[i].0, n).as_str()),
+                    Values::Boolean(b) => self
+                        .push_line(format!("{} = {};", self.config.sheet.types[i].0, b).as_str()),
                 }
             }
 

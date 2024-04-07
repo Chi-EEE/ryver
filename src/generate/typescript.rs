@@ -43,7 +43,11 @@ impl Generator {
         self.push_line(format!("export interface {} {{", self.config.sheet.name).as_str());
         self.indent();
 
-        for (key, type_name) in self.config.sheet.types.clone() {
+        for (i, (key, type_name)) in self.config.sheet.types.clone().iter().enumerate() {
+            if i == self.config.table_name as usize {
+                continue;
+            }
+
             self.push_line(format!("{}: {},", key, type_name).as_str());
         }
 
