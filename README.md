@@ -6,7 +6,7 @@ A Cli that generates luau/ts files from spreadsheets
 ### With Aftman
 Add an entry to the `[tools]` section of `aftman.toml`:
 ```toml
-river = "piquu/ryver@0.1.0"
+river = "piquu/ryver@0.1.2"
 ```
 
 Or use the `aftman` Cli to add it:
@@ -28,6 +28,8 @@ cargo install ryver
     * Folder where the luau/ts files are put
 * `-s`, `--sheet <SHEET>`
     * Sheets that luau/ts files should be generated for
+* `-i`, `--ignore-sheet`
+    * Sheets that luau/ts files wont be generated for
 * `--table-name <NUMBER>`
     * Spreadsheet column thats used as the table/object name
 * `-n`, `--no-type`

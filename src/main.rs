@@ -7,12 +7,17 @@ use calamine::{open_workbook_auto, Reader};
 use clap::{arg, command, Parser};
 use color_eyre::eyre::Result;
 use tracing::{error, info, trace, Level};
+use wildmatch::WildMatch;
 
 use crate::sheet::Sheet;
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
 struct Args {
+    /// Config file
+    #[arg(short, long)]
+    config: Option<PathBuf>,
+
     /// Input file
     #[arg(short, long)]
     file: PathBuf,
@@ -22,13 +27,15 @@ struct Args {
     out: PathBuf,
 
     /// Sheet names
-    #[arg(short, long)]
-    #[clap(default_values_t = ["*".to_owned()])]
+    #[arg(short, long, default_values_t = ["*".to_owned()])]
     sheet: Vec<String>,
 
+    /// Ignore sheet names
+    #[arg(short, long)]
+    ignore_sheet: Vec<String>,
+
     /// Column to be used as the table/object name
-    #[arg(long)]
-    #[clap(default_value_t = 0)]
+    #[arg(long, default_value_t = 0)]
     table_name: i32,
 
     /// Dont generate type
@@ -71,13 +78,12 @@ fn main() -> Result<()> {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => {
             let mut xl = open_workbook_auto(args.file)?;
 
-            if args.sheet.len() == 1 && args.sheet[0] == "*" {
-                for (name, range) in xl.worksheets() {
-                    sheets.push(Sheet::excel(name, range));
+            for (name, range) in xl.worksheets() {
+                if args.ignore_sheet.iter().any(|s| WildMatch::new(s).matches(&name)) {
+                    continue;
                 }
-            } else {
-                for name in args.sheet {
-                    let range = xl.worksheet_range(&name)?;
+
+                if args.sheet.iter().any(|s| WildMatch::new(s).matches(&name)) {
                     sheets.push(Sheet::excel(name, range));
                 }
             }
