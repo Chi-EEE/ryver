@@ -60,10 +60,17 @@ impl Generator {
         self.push("\n");
 
         for column in self.config.sheet.sheet.clone() {
+            let column_id = match &column[self.config.table_name as usize] {
+                Values::String(s) => ".".to_owned() + &s,
+                Values::Number(n) => "[".to_owned() + &n.to_string() + "]",
+                Values::Boolean(b) => "[".to_owned() + &b.to_string() + "]",
+                Values::Nil => "[nil]".to_owned(),
+            };
             self.push_line(
                 format!(
-                    "{}.{} = {{",
-                    self.config.sheet.name, column[self.config.table_name as usize]
+                    "{}{} = {{",
+                    self.config.sheet.name, 
+                    column_id,
                 )
                 .as_str(),
             );

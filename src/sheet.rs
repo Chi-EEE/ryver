@@ -1,8 +1,9 @@
 use core::fmt;
 
 use calamine::{Data, Range};
+use csv::Reader;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Values {
     Nil,
     String(String),
@@ -84,6 +85,63 @@ impl Sheet {
     }
 
     pub fn csv(tabs: bool, name: String, csv: String) -> Self {
-        todo!()
+        if tabs {
+            unimplemented!("tsv not implemented")
+        }
+
+        let mut reader = Reader::from_reader(csv.as_bytes());
+        let headers = reader.headers().unwrap().clone();
+        let mut types = vec![];
+        let mut sheet = vec![];
+
+        let mut sheet_row = vec![];
+        let record = reader.records().next().unwrap().unwrap();
+        for (i, header) in headers.iter().enumerate() {
+            let field = record.get(i).unwrap();
+            let value = if let Ok(int_value) = field.parse::<i64>() {
+                Values::Number(int_value.to_string())
+            } else if let Ok(float_value) = field.parse::<f64>() {
+                Values::Number(float_value.to_string())
+            } else if let Ok(bool_value) = field.parse::<bool>() {
+                Values::Boolean(bool_value)
+            } else if field.is_empty() {
+                Values::Nil
+            } else {
+                Values::String(field.to_string())
+            };
+            types.push((
+                header.to_string(),
+                match value {
+                    Values::Nil => "nil".to_owned(),
+                    Values::String(_) => "string".to_owned(),
+                    Values::Number(_) => "number".to_owned(),
+                    Values::Boolean(_) => "boolean".to_owned(),
+                },
+            ));
+            sheet_row.push(value);
+        }
+        sheet.push(sheet_row);
+
+        for record in reader.records() {
+            let record = record.unwrap();
+            let mut sheet_row = vec![];
+            for field in record.iter() {
+                let value = if let Ok(int_value) = field.parse::<i64>() {
+                    Values::Number(int_value.to_string())
+                } else if let Ok(float_value) = field.parse::<f64>() {
+                    Values::Number(float_value.to_string())
+                } else if let Ok(bool_value) = field.parse::<bool>() {
+                    Values::Boolean(bool_value)
+                } else if field.is_empty() {
+                    Values::Nil
+                } else {
+                    Values::String(field.to_string())
+                };
+                sheet_row.push(value);
+            }
+            sheet.push(sheet_row);
+        }
+
+        Self { name, types, sheet }
     }
 }
