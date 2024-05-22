@@ -93,7 +93,7 @@ fn main() -> Result<()> {
 
             sheets.push(Sheet::csv(
                 false,
-                args.file.file_name().unwrap().to_str().unwrap().to_owned().strip_suffix(".csv").unwrap().to_owned(),
+                args.file.file_name().unwrap().to_str().unwrap().strip_suffix(".csv").unwrap().to_owned(),
                 content,
             ));
         }
@@ -102,7 +102,7 @@ fn main() -> Result<()> {
 
             sheets.push(Sheet::csv(
                 true,
-                args.file.file_name().unwrap().to_str().unwrap().to_owned().strip_suffix(".tsv").unwrap().to_owned(),
+                args.file.file_name().unwrap().to_str().unwrap().strip_suffix(".tsv").unwrap().to_owned(),
                 content,
             ));
         }
