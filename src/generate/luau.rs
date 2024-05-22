@@ -61,19 +61,12 @@ impl Generator {
 
         for column in self.config.sheet.sheet.clone() {
             let column_id = match &column[self.config.table_name as usize] {
-                Values::String(s) =>  format!(".{}", s),
+                Values::String(s) => format!(".{}", s),
                 Values::Number(n) => format!("[{}]", n.to_string()),
                 Values::Boolean(b) => format!("[{}]", b.to_string()),
                 Values::Nil => "[nil]".to_owned(),
             };
-            self.push_line(
-                format!(
-                    "{}{} = {{",
-                    self.config.sheet.name, 
-                    column_id,
-                )
-                .as_str(),
-            );
+            self.push_line(format!("{}{} = {{", self.config.sheet.name, column_id,).as_str());
             self.indent();
 
             for (i, row) in column.iter().enumerate() {
