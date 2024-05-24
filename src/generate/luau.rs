@@ -44,10 +44,6 @@ impl Generator {
         self.indent();
 
         for (i, (key, type_name)) in self.config.sheet.types.clone().iter().enumerate() {
-            if i == self.config.table_name as usize {
-                continue;
-            }
-
             self.push_line(format!("{}: {};", key, type_name).as_str());
         }
 
