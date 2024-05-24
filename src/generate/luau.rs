@@ -70,10 +70,6 @@ impl Generator {
             self.indent();
 
             for (i, row) in column.iter().enumerate() {
-                if i == self.config.table_name.try_into().unwrap() {
-                    continue;
-                }
-
                 match row {
                     Values::Nil => self.push_line("nil;"),
                     Values::String(s) => self
