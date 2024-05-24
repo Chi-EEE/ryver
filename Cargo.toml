@@ -1,6 +1,6 @@
 [package]
 name = "ryver"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["piquu piqu@cock.li"]
 license = "MIT"
