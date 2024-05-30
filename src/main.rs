@@ -155,7 +155,13 @@ fn main() -> Result<()> {
         }
     }
 
-    if args.out.ends_with(".lua") || args.out.ends_with(".luau") {
+    let extension = args.out.extension().and_then(|ext| ext.to_str());
+    let result = match extension {
+        Some("lua") => true,
+        Some("luau") => true,
+        _ => false,
+    };
+    if result {
         if files.len() > 1 {
             error!("multiple sheets are not supported for single file output");
             process::exit(1);
