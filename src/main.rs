@@ -63,7 +63,10 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     if args.verbose {
-        tracing_subscriber::fmt().pretty().with_max_level(Level::TRACE).init();
+        tracing_subscriber::fmt()
+            .pretty()
+            .with_max_level(Level::TRACE)
+            .init();
     } else {
         tracing_subscriber::fmt()
             .without_time()
@@ -79,7 +82,11 @@ fn main() -> Result<()> {
             let mut xl = open_workbook_auto(args.file)?;
 
             for (name, range) in xl.worksheets() {
-                if args.ignore_sheet.iter().any(|s| WildMatch::new(s).matches(&name)) {
+                if args
+                    .ignore_sheet
+                    .iter()
+                    .any(|s| WildMatch::new(s).matches(&name))
+                {
                     continue;
                 }
 
@@ -93,7 +100,14 @@ fn main() -> Result<()> {
 
             sheets.push(Sheet::csv(
                 false,
-                args.file.file_name().unwrap().to_str().unwrap().strip_suffix(".csv").unwrap().to_owned(),
+                args.file
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .strip_suffix(".csv")
+                    .unwrap()
+                    .to_owned(),
                 content,
             ));
         }
@@ -102,7 +116,14 @@ fn main() -> Result<()> {
 
             sheets.push(Sheet::csv(
                 true,
-                args.file.file_name().unwrap().to_str().unwrap().strip_suffix(".tsv").unwrap().to_owned(),
+                args.file
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .strip_suffix(".tsv")
+                    .unwrap()
+                    .to_owned(),
                 content,
             ));
         }
@@ -134,19 +155,38 @@ fn main() -> Result<()> {
         }
     }
 
-    if !args.out.exists() {
-        fs::create_dir_all(&args.out)?;
-        trace!("created output directory")
-    }
-
-    for (name, content) in files {
-        if args.out.join(&name).exists() {
-            fs::remove_file(args.out.join(&name))?;
-            trace!("removed existing file: {:?}", name)
+    if args.out.ends_with(".lua") || args.out.ends_with(".luau") {
+        if files.len() > 1 {
+            error!("multiple sheets are not supported for single file output");
+            process::exit(1);
         }
-
+        if let Some(parent) = args.out.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent)?;
+                trace!("created output directory")
+            }
+        }
+        if args.out.exists() {
+            fs::remove_file(&args.out)?;
+            trace!("removed existing file: {:?}", args.out)
+        }
+        let (name, content) = files.pop().unwrap();
         info!("creating file: {:?}", name);
-        fs::write(args.out.join(&name), content)?;
+        fs::write(args.out, content)?;
+    } else {
+        if !args.out.exists() {
+            fs::create_dir_all(&args.out)?;
+            trace!("created output directory")
+        }
+        for (name, content) in files {
+            if args.out.join(&name).exists() {
+                fs::remove_file(args.out.join(&name))?;
+                trace!("removed existing file: {:?}", name)
+            }
+    
+            info!("creating file: {:?}", name);
+            fs::write(args.out.join(&name), content)?;
+        }
     }
 
     Ok(())
