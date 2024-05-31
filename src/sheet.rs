@@ -1,9 +1,10 @@
 use core::fmt;
+use std::collections::HashSet;
 
 use calamine::{Data, Range};
 use csv::Reader;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Values {
     Nil,
     String(String),
@@ -92,56 +93,78 @@ impl Sheet {
         let mut reader = Reader::from_reader(csv.as_bytes());
         let headers = reader.headers().unwrap().clone();
         let mut types = vec![];
-        let mut sheet = vec![];
 
-        let mut sheet_row = vec![];
-        let record = reader.records().next().unwrap().unwrap();
         for (i, header) in headers.iter().enumerate() {
-            let field = record.get(i).unwrap();
-            let value = if let Ok(int_value) = field.parse::<i64>() {
-                Values::Number(int_value.to_string())
-            } else if let Ok(float_value) = field.parse::<f64>() {
-                Values::Number(float_value.to_string())
-            } else if let Ok(bool_value) = field.parse::<bool>() {
-                Values::Boolean(bool_value)
-            } else if field.is_empty() {
-                Values::Nil
-            } else {
-                Values::String(field.to_string())
-            };
-            types.push((
-                header.to_string(),
-                match value {
-                    Values::Nil => "nil".to_owned(),
-                    Values::String(_) => "string".to_owned(),
-                    Values::Number(_) => "number".to_owned(),
-                    Values::Boolean(_) => "boolean".to_owned(),
-                },
-            ));
-            sheet_row.push(value);
-        }
-        sheet.push(sheet_row);
+            let mut reader = Reader::from_reader(csv.as_bytes());
+            let mut header_types = HashSet::new();
 
-        for record in reader.records() {
-            let record = record.unwrap();
-            let mut sheet_row = vec![];
-            for field in record.iter() {
-                let value = if let Ok(int_value) = field.parse::<i64>() {
-                    Values::Number(int_value.to_string())
-                } else if let Ok(float_value) = field.parse::<f64>() {
-                    Values::Number(float_value.to_string())
-                } else if let Ok(bool_value) = field.parse::<bool>() {
-                    Values::Boolean(bool_value)
-                } else if field.is_empty() {
-                    Values::Nil
-                } else {
-                    Values::String(field.to_string())
-                };
-                sheet_row.push(value);
+            for record in reader.records() {
+                let record = record.unwrap();
+                let field = record.get(i).unwrap();
+                let value = parse_value(field);
+                header_types.insert(value);
             }
-            sheet.push(sheet_row);
+
+            let header_type = determine_type(&header_types);
+            types.push((header.to_string(), header_type));
         }
+
+        let mut reader = Reader::from_reader(csv.as_bytes());
+        let sheet: Vec<Vec<Values>> = reader.records()
+            .map(|record| {
+                record.unwrap().iter()
+                    .map(|field| parse_value(field))
+                    .collect()
+            })
+            .collect();
 
         Self { name, types, sheet }
+    }
+}
+
+fn parse_value(field: &str) -> Values {
+    if let Ok(int_value) = field.parse::<i64>() {
+        Values::Number(int_value.to_string())
+    } else if let Ok(float_value) = field.parse::<f64>() {
+        Values::Number(float_value.to_string())
+    } else if let Ok(bool_value) = field.parse::<bool>() {
+        Values::Boolean(bool_value)
+    } else if field.is_empty() {
+        Values::Nil
+    } else {
+        Values::String(field.to_string())
+    }
+}
+
+fn determine_type(header_types: &HashSet<Values>) -> String {
+    if header_types.len() == 1 {
+        match header_types.iter().next().unwrap() {
+            Values::Nil => "nil".to_owned(),
+            Values::String(string_value) => format!("'{}'", string_value),
+            Values::Number(_) => "number".to_owned(),
+            Values::Boolean(bool_value) => bool_value.to_string(),
+        }
+    } else {
+        let (mut only_numbers, mut only_boolean, mut has_nil) = (true, true, false);
+        for header_type in header_types.iter() {
+            match header_type {
+                Values::Number(_) => only_boolean = false,
+                Values::Boolean(_) => only_numbers = false,
+                Values::Nil => has_nil = true,
+                _ => {
+                    only_numbers = false;
+                    only_boolean = false;
+                },
+            }
+        }
+        let mut header_type = match (only_numbers, only_boolean) {
+            (true, false) => "number".to_owned(),
+            (false, true) => "boolean".to_owned(),
+            _ => "string".to_owned(),
+        };
+        if has_nil {
+            header_type += " | nil";
+        }
+        header_type
     }
 }
