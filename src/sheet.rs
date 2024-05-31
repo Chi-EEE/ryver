@@ -92,6 +92,7 @@ impl Sheet {
 
         let mut reader = Reader::from_reader(csv.as_bytes());
         let headers = reader.headers().unwrap().clone();
+        let row_count = reader.records().count();
         let mut types = vec![];
 
         for (i, header) in headers.iter().enumerate() {
@@ -105,14 +106,17 @@ impl Sheet {
                 header_types.insert(value);
             }
 
-            let header_type = determine_type(&header_types);
+            let header_type = determine_type(&header_types, row_count);
             types.push((header.to_string(), header_type));
         }
 
         let mut reader = Reader::from_reader(csv.as_bytes());
-        let sheet: Vec<Vec<Values>> = reader.records()
+        let sheet: Vec<Vec<Values>> = reader
+            .records()
             .map(|record| {
-                record.unwrap().iter()
+                record
+                    .unwrap()
+                    .iter()
                     .map(|field| parse_value(field))
                     .collect()
             })
@@ -136,7 +140,7 @@ fn parse_value(field: &str) -> Values {
     }
 }
 
-fn determine_type(header_types: &HashSet<Values>) -> String {
+fn determine_type(header_types: &HashSet<Values>, row_count: usize) -> String {
     if header_types.len() == 1 {
         match header_types.iter().next().unwrap() {
             Values::Nil => "nil".to_owned(),
@@ -145,26 +149,54 @@ fn determine_type(header_types: &HashSet<Values>) -> String {
             Values::Boolean(bool_value) => bool_value.to_string(),
         }
     } else {
-        let (mut only_numbers, mut only_boolean, mut has_nil) = (true, true, false);
+        let (mut only_numbers, mut only_boolean, mut only_string, mut has_nil) =
+            (true, true, true, false);
+        let mut string_count = 0;
         for header_type in header_types.iter() {
             match header_type {
-                Values::Number(_) => only_boolean = false,
-                Values::Boolean(_) => only_numbers = false,
-                Values::Nil => has_nil = true,
-                _ => {
+                Values::Number(_) => {
+                    only_string = false;
+                    only_boolean = false;
+                }
+                Values::Boolean(_) => {
+                    only_string = false;
+                    only_numbers = false;
+                }
+                Values::String(_) => {
                     only_numbers = false;
                     only_boolean = false;
-                },
+                    string_count += 1;
+                }
+                Values::Nil => has_nil = true,
+                _ => {
+                    only_string = false;
+                    only_numbers = false;
+                    only_boolean = false;
+                }
             }
         }
-        let mut header_type = match (only_numbers, only_boolean) {
-            (true, false) => "number".to_owned(),
-            (false, true) => "boolean".to_owned(),
-            _ => "string".to_owned(),
-        };
-        if has_nil {
-            header_type += " | nil";
+        if only_string && string_count < row_count {
+            let mut string_header_type = String::new();
+            for header_type in header_types.iter() {
+                match header_type {
+                    Values::String(string_value) => {
+                        string_header_type += &format!("'{}' | ", string_value);
+                    }
+                    _ => {}
+                }
+            }
+            string_header_type = string_header_type.strip_suffix(" | ").unwrap().to_owned();
+            string_header_type
+        } else {
+            let mut header_type = match (only_numbers, only_boolean) {
+                (true, false) => "number".to_owned(),
+                (false, true) => "boolean".to_owned(),
+                _ => "string".to_owned(),
+            };
+            if has_nil {
+                header_type += " | nil";
+            }
+            header_type
         }
-        header_type
     }
 }
