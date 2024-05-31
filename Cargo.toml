@@ -8,7 +8,7 @@ description = "A Cli that generates luau/ts files from spreadsheets"
 readme = "README.md"
 homepage = "https://github.com/piquu/ryver"
 repository = "https://github.com/piquu/ryver"
-keywords = ["cli", "luau", "ts", "spreadsheet"]
+keywords = ["cli", "luau", "ts", "csv", "excel", "spreadsheet"]
 categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
