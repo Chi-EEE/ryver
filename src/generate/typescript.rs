@@ -57,17 +57,30 @@ impl Generator {
 
     fn push_objects(&mut self) {
         for column in self.config.sheet.sheet.clone() {
-            self.push_line(format!("export const {} = {{", column[self.config.table_name as usize]).as_str());
+            self.push_line(
+                format!(
+                    "export const {} = {{",
+                    column[self.config.table_name as usize]
+                )
+                .as_str(),
+            );
             self.indent();
 
             for (i, row) in column.iter().enumerate() {
-                if i == self.config.table_name.try_into().unwrap() { continue; }
+                if i == self.config.table_name.try_into().unwrap() {
+                    continue;
+                }
 
                 match row {
                     Values::Nil => self.push_line("undefined,"),
-                    Values::String(s) => self.push_line(format!("{}: '{}',", self.config.sheet.types[i].0, s).as_str()),
-                    Values::Number(n) => self.push_line(format!("{}: {},", self.config.sheet.types[i].0, n).as_str()),
-                    Values::Boolean(b) => self.push_line(format!("{}: {},", self.config.sheet.types[i].0, b).as_str()),
+                    Values::String(s) => self
+                        .push_line(format!("{}: '{}',", self.config.sheet.types[i].0, s).as_str()),
+                    Values::Number(n) => {
+                        self.push_line(format!("{}: {},", self.config.sheet.types[i].0, n).as_str())
+                    }
+                    Values::Boolean(b) => {
+                        self.push_line(format!("{}: {},", self.config.sheet.types[i].0, b).as_str())
+                    }
                 }
             }
 

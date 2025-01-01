@@ -189,7 +189,7 @@ fn main() -> Result<()> {
                 fs::remove_file(args.out.join(&name))?;
                 trace!("removed existing file: {:?}", name)
             }
-    
+
             info!("creating file: {:?}", name);
             fs::write(args.out.join(&name), content)?;
         }
