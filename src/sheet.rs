@@ -117,7 +117,7 @@ impl Sheet {
                 record
                     .unwrap()
                     .iter()
-                    .map(|field| parse_value(field))
+                    .map(parse_value)
                     .collect()
             })
             .collect();
@@ -168,21 +168,13 @@ fn determine_type(header_types: &HashSet<Values>, row_count: usize) -> String {
                     string_count += 1;
                 }
                 Values::Nil => has_nil = true,
-                _ => {
-                    only_string = false;
-                    only_numbers = false;
-                    only_boolean = false;
-                }
             }
         }
         if only_string && string_count < row_count {
             let mut string_header_type = String::new();
             for header_type in header_types.iter() {
-                match header_type {
-                    Values::String(string_value) => {
-                        string_header_type += &format!("'{}' | ", string_value);
-                    }
-                    _ => {}
+                if let Values::String(string_value) = header_type {
+                    string_header_type += &format!("'{}' | ", string_value);
                 }
             }
             string_header_type = string_header_type.strip_suffix(" | ").unwrap().to_owned();

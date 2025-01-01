@@ -43,7 +43,7 @@ impl Generator {
         self.push_line(format!("export type {} = {{", self.config.sheet.name).as_str());
         self.indent();
 
-        for (i, (key, type_name)) in self.config.sheet.types.clone().iter().enumerate() {
+        for (key, type_name) in self.config.sheet.types.clone().iter() {
             self.push_line(format!("{}: {};", key, type_name).as_str());
         }
 
@@ -58,8 +58,8 @@ impl Generator {
         for column in self.config.sheet.sheet.clone() {
             let column_id = match &column[self.config.table_name as usize] {
                 Values::String(s) => format!(".{}", s),
-                Values::Number(n) => format!("[{}]", n.to_string()),
-                Values::Boolean(b) => format!("[{}]", b.to_string()),
+                Values::Number(n) => format!("[{}]", n),
+                Values::Boolean(b) => format!("[{}]", b),
                 Values::Nil => "[nil]".to_owned(),
             };
             self.push_line(format!("{}{} = {{", self.config.sheet.name, column_id,).as_str());

@@ -156,11 +156,7 @@ fn main() -> Result<()> {
     }
 
     let extension = args.out.extension().and_then(|ext| ext.to_str());
-    let result = match extension {
-        Some("lua") => true,
-        Some("luau") => true,
-        _ => false,
-    };
+    let result = matches!(extension, Some("lua") | Some("luau"));
     if result {
         if files.len() > 1 {
             error!("multiple sheets are not supported for single file output");
