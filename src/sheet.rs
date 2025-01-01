@@ -113,13 +113,7 @@ impl Sheet {
         let mut reader = Reader::from_reader(csv.as_bytes());
         let sheet: Vec<Vec<Values>> = reader
             .records()
-            .map(|record| {
-                record
-                    .unwrap()
-                    .iter()
-                    .map(parse_value)
-                    .collect()
-            })
+            .map(|record| record.unwrap().iter().map(parse_value).collect())
             .collect();
 
         Self { name, types, sheet }
